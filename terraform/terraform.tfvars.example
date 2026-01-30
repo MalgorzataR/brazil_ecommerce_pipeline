@@ -1,0 +1,18 @@
+
+# Terraform Variables Template
+# Copy this file to terraform.tfvars and fill in your actual values
+
+# GCP Project Configuration
+project  = "your-project-id"
+region   = "your-region" 
+location = "your-location"
+
+# Google Cloud Storage
+gcs_bucket_name = "your-bucket-name"
+gcs_storage_class = "STANDARD"
+
+# BigQuery
+bq_dataset_name = "your-dataset-name"
+
+# Credentials
+credentials = "/google_credentials_path.json"

@@ -1,0 +1,137 @@
+version: 2
+sources:
+  - name: staging
+    database: airflow-spark-478915
+    schema: airflow_spark_dataset_478915
+    tables:
+      - name: customers
+      - name: order_reviews
+      - name: orders
+
+models:
+  - name: stg_reviews
+    description: "This dataset includes data about the reviews made by the customers."
+    columns:
+      - name: review_id
+        data_type: string
+        description: "Unique review identifier."
+        tests:
+            - unique:
+                severity: warn
+            - not_null:
+                severity: warn
+      - name: order_id
+        data_type: string
+        description: "Unique identifier of the order."
+        tests:
+          - relationships:
+              to: ref('stg_orders')
+              field: order_id
+
+      - name: review_score
+        data_type: int64
+        description: "Note ranging from 1 to 5 given by the customer on a satisfaction survey."
+        tests:
+          - not_null:
+              severity: warn
+          - accepted_values:
+              values: "{{ var('review_score') }}"
+              severity: warn
+              quote: false
+
+      - name: review_score_desc
+        data_type: string
+        description: "Description of the review score."
+
+      - name: review_creation_date
+        data_type: timestamp
+        description: "Date when the review was created."
+
+      - name: review_answer_timestamp
+        data_type: timestamp
+        description: "Timestamp when the review was answered."
+
+  - name: stg_orders
+    description: "This dataset includes data about orders made by customers."
+    columns:
+      - name: order_id
+        data_type: string
+        description: "Unique identifier of the order."
+        tests:
+          - not_null:
+              severity: warn
+          - unique:
+              severity: warn
+      - name: customer_id
+        data_type: string
+        description: "Key to the customer dataset. Each order has a unique customer_id."
+        tests:
+          - not_null:
+              severity: warn
+          - relationships:
+              to: ref('stg_customers')
+              field: customer_id
+
+      - name: order_status
+        data_type: string
+        description: "Reference to the order status (delivered, shipped, etc)."
+
+      - name: order_purchase_date
+        data_type: date
+        description: "Shows the purchase date."
+
+      - name: order_purchase_timestamp
+        data_type: timestamp
+        description: "Shows the ppurchase timestamp."
+
+      - name: order_approved_at
+        data_type: timestamp
+        description: "Shows the order approval timestamp."
+
+      - name: order_delivered_carrier_date
+        data_type: timestamp
+        description: "Shows the order delivered carrier date."
+
+      - name: order_delivered_customer_date
+        data_type: timestamp
+        description: "Shows the order delivered customer date."
+
+      - name: order_estimated_delivery_date
+        data_type: timestamp
+        description: "Shows the estimated delivery date that was informed to customer at the purchase moment."
+
+  - name: stg_customers
+    description: "This dataset has information about the customer and its location."
+    columns:
+      - name: customer_id
+        data_type: string
+        description: "Key to the orders dataset. Each order has a unique customer_id."
+
+      - name: customer_unique_id
+        data_type: string
+        description: "Unique identifier of a customer."
+        tests:
+          - not_null:
+              severity: warn
+          - unique:
+              severity: warn
+
+      - name: customer_zip_code_prefix
+        data_type: string
+        description: "First five digits of customer zip code."
+
+      - name: customer_city
+        data_type: string
+        description: "Customer city name."
+
+      - name: customer_state
+        data_type: string
+        description: "Customer state abbreviation."
+        tests:
+          - not_null:
+              severity: warn
+          - unique:
+              severity: warn
+        relationships:
+          to: ref('dim_states')
+          field: iso_code

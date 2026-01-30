@@ -1,0 +1,6 @@
+version: 2
+
+seeds: 
+  - name: brazil_states
+    description: >
+      Brazil states table
